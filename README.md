@@ -10,9 +10,7 @@
 - Python 3.11 环境，按主办方指南安装模型依赖及匹配的 torchvision 0.24.0、厂商 Triton 和 FlashAttention。Python 依赖版本见 [requirements.txt](requirements.txt)。
 - xmake **3.0.5+HEAD.f20295f**，以及 Git、tar、unzip、gzip、make、CMake、g++、readelf、flock 和 diff。
 
-当前脚本使用 InfiniFabric 的目录约定：`IFAB_AFS_HOME` 为持久存储目录，`IFAB_WORKSPACE_ROOT` 为本次作业工作目录；Python 环境位于 `$IFAB_AFS_HOME/venvs/minimax-h3`，xmake 位于 `$IFAB_AFS_HOME/tools/bin/xmake`。其他平台需相应适配目录和运行库路径。
-
-另行准备 MiniMax-H3 的 Diffusers 格式权重和主办方统一首帧。下面的 `/path/to/...` 均替换为自己的实际路径。
+当前脚本使用 InfiniFabric 的目录约定：`IFAB_AFS_HOME` 为持久存储目录，`IFAB_WORKSPACE_ROOT` 为本次作业工作目录；Python 环境位于 `$IFAB_AFS_HOME/venvs/minimax-h3`，xmake 位于 `$IFAB_AFS_HOME/tools/bin/xmake`。
 
 ## 复现
 
@@ -34,16 +32,7 @@ bash scripts/reproduce.sh --offline \
 
 脚本按并发 8 构建 Core/LM，再串行生成 PyTorch 参考视频、InfiniLM 原生视频，并调用官方 `minimax_h3_compare.py`。固定样例为 `A dog falls asleep`、seed 42、50 步、124 帧，使用 GPU 0–7。
 
-可按需在运行命令中增加：
-
-| 参数 | 用途 |
-| --- | --- |
-| `--skip-build` | 复用当前作业已完成的构建 |
-| `--skip-build --runtime /path/to/runtime-dir` | 在新作业中恢复已保存的编译产物 |
-| `--reference-video /path/to/reference.mp4` | 复用同配置 PyTorch 视频，跳过参考生成 |
-| `--output-dir /path/to/new-output-dir` | 指定持久目录或作业目录内尚不存在的输出目录 |
-
-编译产物的保存与恢复使用 [ss5_native_checkpoint_v2.py](scripts/ss5_native_checkpoint_v2.py)，可通过 `python3 scripts/ss5_native_checkpoint_v2.py --help` 查看用法。固定上游提交和构建参数见 [源码准备脚本](scripts/prepare_sources.sh) 与 [构建脚本](scripts/ss5_workspace_v3d.sh)。
+固定上游提交和构建参数见 [源码准备脚本](scripts/prepare_sources.sh) 与 [构建脚本](scripts/ss5_workspace_v3d.sh)。
 
 ## 输出
 
