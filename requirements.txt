@@ -1,0 +1,12 @@
+# Selected runtime and comparison versions for the organizer-provided venv.
+# Keep Hygon Torch, vendor Triton/FlashAttention and source-built torchvision.
+# Other model dependencies follow the official environment guide.
+diffusers==0.40.0
+transformers==5.14.1
+huggingface_hub==1.28.0
+httpx==0.28.1
+scikit-image==0.25.2
+scipy==1.15.3
+lazy-loader==0.4
+networkx==3.4.2
+tifffile==2024.8.30
