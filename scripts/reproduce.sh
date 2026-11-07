@@ -4,12 +4,14 @@ set -euo pipefail
 repo_root=$(cd -P -- "$(dirname -- "$0")/.." && pwd)
 fail() { echo "REPRODUCE_FAILED: $*" >&2; exit 1; }
 prepare_only=false
+build_only=false
 skip_build=false
 runtime=''
 run_args=()
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --prepare-only) prepare_only=true; shift ;;
+    --build-only) build_only=true; shift ;;
     --offline) shift ;; # Target execution only consumes prepared local inputs.
     --skip-build) skip_build=true; shift ;;
     --runtime)
@@ -26,6 +28,7 @@ while [ "$#" -gt 0 ]; do
       run_args+=("$1" "$(realpath -m -- "$2")"); shift 2 ;;
     --help|-h)
       echo '准备：bash scripts/reproduce.sh --prepare-only'
+      echo '编译并保存：bash scripts/reproduce.sh --offline --build-only'
       echo '运行：bash scripts/reproduce.sh --offline --first-frame /个人路径/first_frame.png'
       echo '复用：增加 --skip-build [--runtime /个人AFS/运行包目录] [--reference-video /参考视频.mp4]'
       exit 0 ;;
@@ -33,7 +36,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 if "$prepare_only"; then
-  [ -z "$runtime" ] && ! "$skip_build" && [ "${#run_args[@]}" -eq 0 ] || fail '--prepare-only 单独使用'
+  [ -z "$runtime" ] && ! "$skip_build" && ! "$build_only" && [ "${#run_args[@]}" -eq 0 ] || fail '--prepare-only 单独使用'
   bash "$repo_root/scripts/prepare_sources.sh"
   python3 -B "$repo_root/scripts/build_support_bundles.py"
   mkdir -p -- "$repo_root/dist/platform-inputs/ss4-prep"
@@ -42,7 +45,12 @@ if "$prepare_only"; then
   echo "PREPARED_INPUTS=$repo_root/dist/platform-inputs"
   exit 0
 fi
-[[ " ${run_args[*]} " == *' --first-frame '* ]] || fail '请用 --first-frame 指定主办方统一首帧'
+if "$build_only"; then
+  ! "$skip_build" && [ -z "$runtime" ] && [ "${#run_args[@]}" -eq 0 ] \
+    || fail '--build-only 与生成、恢复参数分开使用'
+else
+  [[ " ${run_args[*]} " == *' --first-frame '* ]] || fail '请用 --first-frame 指定主办方统一首帧'
+fi
 [ -z "$runtime" ] || "$skip_build" || fail '--runtime 需与 --skip-build 一起使用'
 afs=$(cd -P -- "${IFAB_AFS_HOME:?缺少个人 AFS}" && pwd)
 workspace=$(cd -P -- "${IFAB_WORKSPACE_ROOT:?请进入 8 卡会话}" && pwd)
@@ -75,10 +83,18 @@ if ! "$skip_build"; then
     bash "$repo_root/scripts/ss5_workspace_v3d.sh" core-mha
     bash "$repo_root/scripts/ss5_workspace_v3d.sh" lm
   )
+  if "$build_only"; then
+    (
+      cd -P -- "$afs"
+      python3 -B "$repo_root/scripts/ss5_native_checkpoint_v2.py" save
+    )
+    echo 'SS5_BUILD_ONLY_COMPLETE'
+    exit 0
+  fi
 elif [ -n "$runtime" ]; then
   [ ! -e "$work" ] || fail '当前会话已有构建目录，请直接 --skip-build 或另开会话恢复'
   (
-    cd -P -- "$afs"
+    cd -P -- "$workspace"
     python3 -B "$repo_root/scripts/ss5_native_checkpoint_v2.py" restore "$runtime"
   )
 fi
