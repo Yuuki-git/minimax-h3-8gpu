@@ -38,4 +38,4 @@ bash scripts/reproduce.sh --offline \
 
 终端打印 `RESULT_DIR`，默认位于 `$IFAB_AFS_HOME/ss5-fl2va-*`。其中 `reference_fl2va.mp4` 和 `infinilm_fl2va.mp4` 分别为参考及原生视频，`run.log` 为官方比较结果，其他日志与 `arguments.json` 记录本次运行。
 
-八卡路径已实测成片，官方平均视频 SSIM 为 **94.687%**。整理后的统一复现入口尚待在新八卡环境完整复跑。
+已通过本仓库入口完成 Core/LM 源码构建及两路视频生成。2026-11-08 的官方比较结果为：两路均为 **768 × 928、124 帧**，平均视频 SSIM 为 **93.455%**。
