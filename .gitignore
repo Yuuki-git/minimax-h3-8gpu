@@ -20,3 +20,14 @@
 !/scripts/ss5_workspace_v3d.sh
 !/scripts/ss5_xmake_extract_v3.py
 !/scripts/ss5_native_checkpoint_v2.py
+
+!/source-lock.json
+!/codegen/
+!/assets/
+!/docs/
+!/scripts/*.sh
+!/scripts/*.py
+/docs/*
+!/docs/reproduce-optimized.sh
+/codegen/__pycache__/
+*.pyc

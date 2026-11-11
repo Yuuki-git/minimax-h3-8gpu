@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "sources": {
+    "InfiniCore": {
+      "url": "https://github.com/Yuuki-git/InfiniCore.git",
+      "branch": "minimax-h3-8gpu-opt",
+      "commit": "72f87009d6a6fdd970ee8365c99e7416bd59d4a0",
+      "base": "f32e2fbb2a9b2ca912b5711f4f3836c403196a74",
+      "files": {
+        "include/infinicore/ss5_ninetoothed.hpp": "76d83d2c82116179a3c18932e396c8228d79d3487515d21c0ad32b56f87fc57f",
+        "python/infinicore/__init__.py": "7b5adff8368a2a7f3c2ec550d11bc0ae38e453919312621ab07a7631a8a9d293",
+        "python/infinicore/_ss5_ninetoothed.py": "cba2d6b223a9d66672bf87461a312294be336428d8725c0e07e47f6b4a32b177",
+        "python/infinicore/_ss5_triton_cache.py": "f3051d896f25935e7d1dc7a0ae75b83e59843004c5ab62dda5b83de011a7e6bf",
+        "src/infinicore/ops/multi_head_attention/hygon/mha_flashattn_hygon.cc": "50383b7b1f49de8aa0ee12aac53c653ad80c81e754dfc3ce6644d581cfd455e4",
+        "src/infinicore/ops/ss5_ninetoothed/generated/ninetoothed.h": "b5bfa60eba71e7ae49fa4bfbcdbb0d7d17220c405ec71314fd875f6a765038ee",
+        "src/infinicore/ops/ss5_ninetoothed/generated/ss5_s3_adaln.h": "fbce287f58e8ef3bea38f519c7d69f746f27b6e55149d5e06df4d7ba6e6a54c2",
+        "src/infinicore/ops/ss5_ninetoothed/generated/ss5_s3_gate.h": "cd42c660ad479c45ab17e1fbb50d31741d3111313deef4284695cbefb2d01b7e",
+        "src/infinicore/ops/ss5_ninetoothed/generated/ss5_s4_attention.h": "e8d008217f33ad8786c444ff695d6174ed4586c7110de1a58027fd22a57c540f",
+        "src/infinicore/ops/ss5_ninetoothed/ss5_ninetoothed.cc": "655ee15e6f37a9d373b9f901de3aad6577474992821e9f1309b58442214ccdb4",
+        "src/infinicore/pybind11/infinicore.cc": "5a5b286bfe8b7dbdb4ceb73fc9aa287281e45ad4edd016922fd3d44c727b2757"
+      }
+    },
+    "InfiniLM": {
+      "url": "https://github.com/Yuuki-git/InfiniLM.git",
+      "branch": "minimax-h3-8gpu-opt",
+      "commit": "207f2fa95adec6104134cb95ce29acb8e5846178",
+      "base": "65deb91f840ebaef752d028fad2f3217ce0950f4",
+      "files": {
+        "csrc/models/minimax_h3/minimax_h3_transformer.cpp": "e49149234ce72febf8f28902944b131a092b85c68f5821cce580f7545989c323"
+      }
+    },
+    "ninetoothed-ss5": {
+      "url": "https://github.com/Yuuki-git/ninetoothed-ss5.git",
+      "branch": "main",
+      "commit": "2e2d4da420d6edde1e0f3c17e05a43f111198d05",
+      "upstream_wheel_sha256": "7f15a35b308f00659c63508ff14f964f431234397e5dc97f73e2e4008ab51f08"
+    }
+  },
+  "build_dependencies": {
+    "numpy_wheel": "numpy-1.26.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+    "numpy_sha256": "666dbfb6ec68962c033a450943ded891bed2d54e6755e35e5835d63f4f6931d5",
+    "xmake_repo_commit": "bd29d77f242e247589457638272d9936a24a3fe0"
+  }
+}
