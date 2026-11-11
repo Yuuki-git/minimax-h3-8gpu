@@ -6,10 +6,12 @@
 
 | 仓库 | branch | commit |
 | --- | --- | --- |
-| [InfiniCore](https://github.com/Yuuki-git/InfiniCore) | minimax-h3-8gpu-opt | 72f87009d6a6fdd970ee8365c99e7416bd59d4a0 |
-| [InfiniLM](https://github.com/Yuuki-git/InfiniLM) | minimax-h3-8gpu-opt | 207f2fa95adec6104134cb95ce29acb8e5846178 |
-| [NineToothed](https://github.com/Yuuki-git/ninetoothed-ss5) | main | 2e2d4da420d6edde1e0f3c17e05a43f111198d05 |
-| [工程入口](https://github.com/Yuuki-git/minimax-h3-8gpu) | main | 固定标签 v3-ss5-minimal；完整 commit 见提交报告 |
+| [InfiniCore](https://github.com/Yuuki-git/InfiniCore/tree/minimax-h3-8gpu-opt) | minimax-h3-8gpu-opt | [72f87009d6a6fdd970ee8365c99e7416bd59d4a0](https://github.com/Yuuki-git/InfiniCore/commit/72f87009d6a6fdd970ee8365c99e7416bd59d4a0) |
+| [InfiniLM](https://github.com/Yuuki-git/InfiniLM/tree/minimax-h3-8gpu-opt) | minimax-h3-8gpu-opt | [207f2fa95adec6104134cb95ce29acb8e5846178](https://github.com/Yuuki-git/InfiniLM/commit/207f2fa95adec6104134cb95ce29acb8e5846178) |
+| [NineToothed](https://github.com/Yuuki-git/ninetoothed-ss5/tree/main) | main | [2e2d4da420d6edde1e0f3c17e05a43f111198d05](https://github.com/Yuuki-git/ninetoothed-ss5/commit/2e2d4da420d6edde1e0f3c17e05a43f111198d05) |
+| [工程入口](https://github.com/Yuuki-git/minimax-h3-8gpu/tree/v3-ss5-minimal) | main；复现标签 v3-ss5-minimal | [afc282f1743f5df282f960ce7d90cab6504967b0](https://github.com/Yuuki-git/minimax-h3-8gpu/commit/afc282f1743f5df282f960ce7d90cab6504967b0) |
+
+提交报告和下方命令均固定使用 `v3-ss5-minimal` / `afc282f1743f5df282f960ce7d90cab6504967b0`。`main` 后续的说明更新不改变该复现版本。
 
 前三个仓库的版本由 `source-lock.json` 固定。Core 基于官方 f32e2fbb2a9b2ca912b5711f4f3836c403196a74，仅改动 11 个文件；LM 基于官方 65deb91f840ebaef752d028fad2f3217ce0950f4，仅改动 Transformer 的 1 个文件。官方生成、比较脚本保持原样。九齿基于官方 0.26.0 wheel 完整源码，补丁版为 0.26.0+ss5.1。NTops SDPA 定义来源为 82cba6cf2200919b5d12c86adbea60cbfb516040，随源码保留 Apache-2.0 许可证。
 
