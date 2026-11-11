@@ -39,6 +39,7 @@
   "build_dependencies": {
     "numpy_wheel": "numpy-1.26.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
     "numpy_sha256": "666dbfb6ec68962c033a450943ded891bed2d54e6755e35e5835d63f4f6931d5",
-    "xmake_repo_commit": "bd29d77f242e247589457638272d9936a24a3fe0"
+    "xmake_repo_commit": "bd29d77f242e247589457638272d9936a24a3fe0",
+    "xmake_commit": "f20295f255d967af9d91de6f1ed5eeadf17d30a7"
   }
 }

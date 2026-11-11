@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 import shutil
 
-from run_round1 import sha256, write_json
+from common import sha256, write_json
 
 
 def main():
@@ -29,10 +29,9 @@ def main():
         path.mkdir(parents=True, exist_ok=True)
         os.environ[variable] = str(path)
     import ninetoothed as nt
-    from round2_aot_worker import select_device
-    from round3_hip_aot import build_aot
-    from round1_llvm_compat import install_legacy_gep_adapter
-    import round1_kernels as kernels
+    from hip import build_aot
+    from llvm_compat import install_legacy_gep_adapter
+    import fusion as kernels
 
     aot = importlib.import_module('ninetoothed.aot')
     expected = 'fc86e4aa739ac6bc61d3e638a18ac960ef9a48cc1d5d876716bd4645c5d5efb3'
@@ -42,10 +41,17 @@ def main():
     write_json(destination / 'settings.json', {'device': 0})
     report = {'case': args.case, 'completed': False,
               'environment': {n: importlib.metadata.version(n) for n in ('torch', 'triton', 'numpy', 'ninetoothed')}}
-    select_device(destination, report)
+    import torch
+    from triton.runtime import driver
+    if torch.cuda.device_count() != 8:
+        raise RuntimeError("Use an eight-GPU gfx936 session")
+    torch.cuda.set_device(0)
+    target = driver.active.get_current_target()
+    if (target.backend, target.arch, target.warp_size) != ("hip", "gfx936", 64):
+        raise ValueError(f"Unexpected target: {target}")
     report['compiler_compatibility'] = install_legacy_gep_adapter(destination, args.case)
     if args.case == 'attention':
-        from round4_attention import definitions, compile_attention
+        from attention import definitions, compile_attention
         definition, _ = definitions()
         library = compile_attention(destination, definition, report)
         name = 'ss5_s4_attention'

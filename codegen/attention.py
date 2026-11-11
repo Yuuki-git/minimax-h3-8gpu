@@ -1,22 +1,16 @@
-"""Compile H3's selected SDPA through NineToothed and the DTK AOT tool."""
-
-import ctypes as ct
+"""The accepted fixed H3 attention definition and AOT packaging."""
 import importlib
 import json
-import math
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 from types import SimpleNamespace
 from unittest.mock import patch
-
-from round1_worker import DIM, HEADS, SEQUENCE, core_bridge, error_metrics, input_digest, load_core, tensor_info
-from round2_aot_worker import NineToothedTensor, dtk_roots, logged_command
-from round3_attention import DISTRIBUTIONS, SCHEDULES, inputs_for
-from round3_hip_aot import adapt_vendor_cpp, core_stream, exact
-from run_round1 import sha256
-
+from common import sha256, dtk_roots, logged_command
+from hip import adapt_vendor_cpp
+DIM, HEADS, SEQUENCE = 128, 7, 27570
+SCHEDULES = ((64, 64, 4, 1),)
 
 ENTRY = "ss5_s4_attention"
 NAMES = ("query", "key", "value", "scale", "output")
@@ -73,7 +67,7 @@ def compile_attention(destination, definition, report):
 
     def run_tool(command, **kwargs):
         if command[:3] == ["python", "-m", "triton.tools.compile"]:
-            command = [sys.executable, "-B", str(Path(__file__).with_name("round2_aot_worker.py")),
+            command = [sys.executable, "-B", str(Path(__file__).with_name("compiler.py")),
                        "compiler", str(destination), raw.name, *command[3:]]
             report["compiler_calls"].append([str(arg) for arg in command])
             return subprocess.run(command, **kwargs)
@@ -137,72 +131,3 @@ def compile_attention(destination, definition, report):
         raise ValueError("Generated attention host argument order differs")
     report["launcher_sha256"] = sha256(library)
     return library
-
-
-def configure_lds(handle, required, report):
-    import triton
-
-    configure = getattr(handle, f"ss5_configure_lds_{ENTRY}")
-    configure.argtypes = (ct.c_int, ct.c_uint)
-    configure.restype = ct.c_int
-    limits = []
-    report["lds_validation"] = {"required_bytes": required, "max_shared_mem_by_device": limits}
-    for device in range(8):
-        limit = triton.runtime.driver.active.utils.get_device_properties(device)["max_shared_mem"]
-        if type(limit) is not int or not required <= limit <= 0xFFFF_FFFF:
-            raise ValueError(f"Invalid LDS limit on device {device}: {limit!r} for {required} required bytes")
-        limits.append(limit)
-        status = configure(device, limit)
-        if status:
-            raise RuntimeError(f"Configuring LDS for device {device} returned {status}")
-
-
-def view4(tensor):
-    return NineToothedTensor(tensor.data_ptr(), (ct.c_uint64 * 4)(*tensor.shape), (ct.c_int64 * 4)(*tensor.stride()))
-
-
-def validate_attention(torch, settings, original, library, report):
-    import ninetoothed as nt
-    from infinicore.context import sync_stream
-    from pinned_sdpa_v5 import CausalVariant
-
-    core = load_core(torch, settings, report)
-    device = torch.device("cuda", settings["device"])
-    core.set_device(core.device("cuda", settings["device"]))
-    pointer, external = core_stream(torch, device)
-    handle = ct.CDLL(str(library))
-    required = report["device_binary"]["shared"] + report["elf_resources"]["group_segment_fixed_size"]
-    configure_lds(handle, required, report)
-    launch = getattr(handle, f"launch_{ENTRY}")
-    launch.argtypes = (ct.c_void_p,) + (NineToothedTensor,) * len(NAMES)
-    launch.restype = ct.c_int
-    failure = getattr(handle, f"ss5_launch_phase_{ENTRY}")
-    failure.argtypes = ()
-    failure.restype = ct.c_char_p
-    _, _, warps, stages = SCHEDULES[0]
-    jit = nt.make(*original, kernel_name="ss5_s4_attention_jit", num_warps=warps, num_stages=stages, max_num_configs=1)
-    scale = ct.c_double(ct.c_float(1 / math.sqrt(DIM)).value)
-    scalar = NineToothedTensor(ct.addressof(scale), None, None)
-    mask = torch.empty((1, HEADS, SEQUENCE, SEQUENCE), device="meta")
-    checks = []
-    report["core_stream"] = pointer
-    report["checks"] = checks
-    for distribution in DISTRIBUTIONS:
-        q, k, v = inputs_for(torch, device, distribution)
-        expected, actual = torch.full_like(q, float("nan")), torch.full_like(q, float("nan"))
-        qh, kh, vh, eh, ah = (x.permute(0, 2, 1, 3) for x in (q, k, v, expected, actual))
-        torch.cuda.synchronize(device)
-        with torch.cuda.stream(external):
-            jit(qh, kh, vh, mask, False, scale.value, eh, False, CausalVariant.UPPER_LEFT)
-            status = launch(pointer, view4(qh), view4(kh), view4(vh), scalar, view4(ah))
-            if status:
-                raise RuntimeError(f"Attention launch at {failure().decode('ascii')} returned {status}")
-            # Exercise a downstream Core op on the same non-default stream.
-            consumed = torch.empty_like(actual)
-            core.add(core_bridge(core, actual), core_bridge(core, q), out=core_bridge(core, consumed))
-        sync_stream()
-        checks.append({"distribution": distribution, "input_sha256": input_digest((q, k, v)),
-                       "kernel_inputs": [tensor_info(x) for x in (qh, kh, vh)],
-                       "error_vs_jit": error_metrics(actual, expected),
-                       "consumer_vs_jit": error_metrics(consumed, expected + q)})
-    return all(exact(item["error_vs_jit"]) and exact(item["consumer_vs_jit"]) for item in checks)

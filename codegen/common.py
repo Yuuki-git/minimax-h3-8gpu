@@ -22,3 +22,18 @@ def checked_child(path, allowed_root):
     if resolved == allowed_root or not resolved.is_relative_to(allowed_root):
         raise ValueError(f"Write target is outside the terminal directory/parent: {resolved}")
     return resolved
+
+import os
+import subprocess
+
+def logged_command(command, directory, filename, timeout):
+    with (directory / filename).open("wb") as log:
+        return subprocess.run(command, cwd=directory, stdout=log, stderr=subprocess.STDOUT,
+                              timeout=timeout, check=False).returncode
+
+
+def dtk_roots():
+    roots = [Path(path) for path in ("/opt/dtk/cuda/cuda", "/opt/dtk", "/opt/hyhal", "/opt/rocm", "/usr/local/cuda")]
+    roots[:0] = [Path(os.environ[key]) for key in ("HYGON_CUDA_HOME", "DTK_ROOT", "CUDA_HOME")
+                 if os.environ.get(key) and Path(os.environ[key]).is_absolute()]
+    return list(dict.fromkeys(roots))

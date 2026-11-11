@@ -1,4 +1,5 @@
 #!/bin/bash
 set -euo pipefail
 here=$(cd -P -- "$(dirname -- "$0")" && pwd)
-exec bash "$here/run_optimized.sh" compare "$@"
+source "$here/env.sh"
+exec "$SS5_BASE_PYTHON" -B -u "$here/run.py" "$@"
