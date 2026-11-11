@@ -11,7 +11,7 @@
 | [InfiniCore](https://github.com/Yuuki-git/InfiniCore) | `minimax-h3-8gpu-opt` | `72f87009d6a6fdd970ee8365c99e7416bd59d4a0` |
 | [InfiniLM](https://github.com/Yuuki-git/InfiniLM) | `minimax-h3-8gpu-opt` | `207f2fa95adec6104134cb95ce29acb8e5846178` |
 | [NineToothed](https://github.com/Yuuki-git/ninetoothed-ss5) | `main` | `2e2d4da420d6edde1e0f3c17e05a43f111198d05` |
-| [工程入口](https://github.com/Yuuki-git/minimax-h3-8gpu) | `main`，固定标签 `v2-ss5-optimized` | 以固定标签取得本版；其余三个提交及文件摘要见 [source-lock.json](source-lock.json) |
+| [工程入口](https://github.com/Yuuki-git/minimax-h3-8gpu) | `main`，固定标签 `v2.1-ss5-optimized` | 以固定标签取得本版；其余三个提交及文件摘要见 [source-lock.json](source-lock.json) |
 
 Core 基于官方 `f32e2fbb2a9b2ca912b5711f4f3836c403196a74`，仅修改 11 个候选文件；LM 基于官方 `65deb91f840ebaef752d028fad2f3217ce0950f4`，仅修改 Transformer 的 1 个文件。原基线保留在工程入口的 `v1-baseline` 标签（`0a56c656bae7c907a6d72d0382aa120ae5ec3f1e`）。原有基线脚本保持原样。
 
@@ -38,7 +38,7 @@ Core 基于官方 `f32e2fbb2a9b2ca912b5711f4f3836c403196a74`，仅修改 11 个�
 set -euo pipefail
 cd -- "${IFAB_WORKSPACE_ROOT:?}"
 export SS5_OPT_WORK="${IFAB_WORKSPACE_ROOT:?}/ss5-optimized"
-git clone --branch v2-ss5-optimized --depth 1 \
+git clone --branch v2.1-ss5-optimized --depth 1 \
   https://github.com/Yuuki-git/minimax-h3-8gpu.git
 cd minimax-h3-8gpu
 bash scripts/fetch_sources.sh

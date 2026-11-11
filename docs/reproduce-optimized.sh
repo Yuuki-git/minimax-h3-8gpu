@@ -2,7 +2,7 @@
 set -euo pipefail
 cd -- "${IFAB_WORKSPACE_ROOT:?}"
 export SS5_OPT_WORK="${IFAB_WORKSPACE_ROOT:?}/ss5-optimized"
-git clone --branch v2-ss5-optimized --depth 1 \
+git clone --branch v2.1-ss5-optimized --depth 1 \
   https://github.com/Yuuki-git/minimax-h3-8gpu.git
 cd minimax-h3-8gpu
 bash scripts/fetch_sources.sh
